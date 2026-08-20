@@ -45,7 +45,7 @@ const links = [
     icon: FileText,
   },
   {
-    href: "/teacher/attendance",
+    href: "/teacher",
     key: "navTeacher" as const,
     icon: ClipboardCheck,
   },

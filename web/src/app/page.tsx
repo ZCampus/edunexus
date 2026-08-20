@@ -7,8 +7,9 @@ import { LocaleToggle } from "@/components/locale-toggle";
 import { OfflineBanner } from "@/components/offline-banner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { demoUsers } from "@/lib/auth";
+import { adminDemoUsers, platformDemoUsers, portalDemoUsers } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { roleLabelKey } from "@/lib/role-label";
 
 export default function HomePage() {
   const { t } = useI18n();
@@ -55,20 +56,51 @@ export default function HomePage() {
                 <ArrowRight data-icon="inline-end" />
               </Link>
             </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/register">{t("ctaTrial")}</Link>
+            </Button>
           </div>
         </div>
 
         <section className="animate-fade max-w-xl rounded-2xl border border-border/80 bg-card/80 p-5 backdrop-blur-sm">
           <p className="mb-3 text-sm font-medium text-muted-foreground">
-            {t("demoAccountsHint")}
+            {t("demoPlatformHint")}
           </p>
           <ul className="flex flex-col gap-2 text-sm">
-            {demoUsers.map((account) => (
+            {platformDemoUsers.map((account) => (
               <li
                 key={account.id}
                 className="flex flex-col gap-0.5 rounded-lg border border-border/60 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
               >
-                <span className="font-medium capitalize">{account.role}</span>
+                <span className="font-medium">{t(roleLabelKey(account.role))}</span>
+                <span className="text-muted-foreground">{account.email}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 mb-2 text-sm font-medium text-muted-foreground">
+            {t("demoAdminHint")}
+          </p>
+          <ul className="flex flex-col gap-2 text-sm">
+            {adminDemoUsers.map((account) => (
+              <li
+                key={account.id}
+                className="flex flex-col gap-0.5 rounded-lg border border-border/60 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="font-medium">{t(roleLabelKey(account.role))}</span>
+                <span className="text-muted-foreground">{account.email}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 mb-2 text-sm font-medium text-muted-foreground">
+            {t("demoPortalHint")}
+          </p>
+          <ul className="flex flex-col gap-2 text-sm">
+            {portalDemoUsers.map((account) => (
+              <li
+                key={account.id}
+                className="flex flex-col gap-0.5 rounded-lg border border-border/60 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="font-medium">{t(roleLabelKey(account.role))}</span>
                 <span className="text-muted-foreground">{account.email}</span>
               </li>
             ))}

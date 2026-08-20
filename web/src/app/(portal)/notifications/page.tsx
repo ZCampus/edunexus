@@ -92,6 +92,7 @@ export default function NotificationsPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        {user?.role === "parent" ? null : (
         <Card className="animate-rise-delay border-border/80">
           <CardHeader>
             <CardTitle className="text-base">{t("notifSend")}</CardTitle>
@@ -153,6 +154,7 @@ export default function NotificationsPage() {
             </form>
           </CardContent>
         </Card>
+        )}
 
         <Card className="animate-rise-delay border-border/80">
           <CardHeader>

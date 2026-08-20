@@ -37,6 +37,7 @@ export default function RootLayout({
     <html lang="sw" suppressHydrationWarning>
       <body
         className={`${dmSans.variable} ${fraunces.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"

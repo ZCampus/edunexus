@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  CalendarCheck,
+  FileText,
+  MessageCircle,
+  NotebookPen,
+  Wallet,
+} from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
+import { ParentHeader } from "@/components/parent/ui";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,104 +18,226 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { FeedCard } from "@/components/feed-card";
-import { campusFeed } from "@/lib/campus-feed";
-import { useI18n } from "@/lib/i18n";
-import { formatTzs, parentProfile } from "@/lib/mock-data";
+import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/lib/auth";
+import { useParentChild } from "@/lib/parent-child";
+import { useParentCopy } from "@/lib/parent-copy";
+import {
+  childAlerts,
+  childAttendance,
+  childHomework,
+  childTodayLessons,
+  formatTzs,
+  parentAccount,
+  pendingHomework,
+} from "@/lib/parent-mvp";
 import { cn } from "@/lib/utils";
 
-const statusTone = {
-  present: "bg-teal-600",
-  late: "bg-amber-500",
-  absent: "bg-rose-500",
-};
-
 export default function ParentDashboardPage() {
-  const { t } = useI18n();
-  const child = parentProfile.children[0];
+  const { user } = useAuth();
+  const { child } = useParentChild();
+  const c = useParentCopy();
+  const name = user?.name ?? parentAccount.name;
+  const attendance = childAttendance(child.id);
+  const pending = pendingHomework(child.id);
+  const alerts = childAlerts[child.id] ?? [];
+  const today = childTodayLessons(child.id);
+  const homework = childHomework[child.id] ?? [];
 
   return (
     <div className="flex flex-col gap-4">
-      <Card className="border-border/70 bg-card shadow-sm">
+      <ParentHeader
+        title={`${c.welcome}, ${name.split(" ")[0]}`}
+        hint={`${child.name} · ${child.className} · ${c.hubHint}`}
+      />
+
+      <Card>
         <CardHeader className="pb-3">
-          <CardDescription>
-            {t("parentGreeting")}, {parentProfile.name}
-          </CardDescription>
-          <CardTitle className="font-[family-name:var(--font-display)] text-xl">
-            {child.name}
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">{child.className}</p>
+          <CardDescription>{c.classTeacher}</CardDescription>
+          <CardTitle className="text-lg">{child.classTeacher}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {child.classTeacherTitle}
+          </p>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Button asChild>
-            <Link href="/fees">
-              {t("parentPay")}
-              <ArrowRight data-icon="inline-end" />
+            <Link href="/parent/fees">
+              <Wallet data-icon="inline-start" />
+              {c.payFees}
             </Link>
           </Button>
           <Button asChild variant="secondary">
-            <Link href="/report-card">{t("viewResults")}</Link>
+            <Link href="/parent/results">
+              <FileText data-icon="inline-start" />
+              {c.viewResults}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/parent/messages">
+              <MessageCircle data-icon="inline-start" />
+              {c.messageTeacher}
+            </Link>
           </Button>
         </CardContent>
       </Card>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Card className="border-border/70 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardDescription>{t("parentBalance")}</CardDescription>
-            <CardTitle className="font-[family-name:var(--font-display)] text-3xl tabular-nums">
-              {formatTzs(parentProfile.balanceTzs)}
-            </CardTitle>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatCard
+          label={c.overallAttendance}
+          value={`${attendance.overall.pct}%`}
+          hint={`${attendance.overall.attended}/${attendance.overall.total} ${c.periods}`}
+        >
+          <Progress value={attendance.overall.pct} className="mt-2" />
+        </StatCard>
+        <StatCard
+          label={c.pendingHw}
+          value={String(pending.length)}
+          hint={c.homeworkDue}
+        />
+        <StatCard
+          label={c.fees}
+          value={formatTzs(child.feeBalanceTzs)}
+          hint={child.name.split(" ")[0]}
+        />
+      </div>
+
+      {alerts.length ? (
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-3">
+            <CardTitle>{c.alerts}</CardTitle>
           </CardHeader>
-        </Card>
-        <Card className="border-border/70 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t("parentAttendance")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
-              {parentProfile.attendanceWeek.map((day) => (
-                <div
-                  key={day.day}
-                  className="flex flex-1 flex-col items-center gap-2"
-                >
-                  <span className="text-xs text-muted-foreground">{day.day}</span>
-                  <span
-                    className={cn("size-3 rounded-full", statusTone[day.status])}
-                    title={day.status}
-                  />
-                </div>
-              ))}
-            </div>
+          <CardContent className="flex flex-col gap-2">
+            {alerts.map((alert) => (
+              <Link
+                key={alert.id}
+                href={alert.href}
+                className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm hover:bg-destructive/10"
+              >
+                {alert.text}
+              </Link>
+            ))}
           </CardContent>
         </Card>
-      </div>
+      ) : null}
 
-      <div className="flex flex-col gap-3">
-        {campusFeed
-          .filter((p) => p.category === "PARENTS" || p.category === "ACADEMICS")
-          .map((post) => (
-            <FeedCard key={post.id} post={post} />
-          ))}
-      </div>
-
-      <Card className="border-border/70 shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base">{t("parentNotices")}</CardTitle>
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between gap-3">
+          <div>
+            <CardTitle>{c.todayPeriods}</CardTitle>
+            <CardDescription>{child.className}</CardDescription>
+          </div>
+          <Link
+            href="/parent/attendance"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {c.viewAll}
+          </Link>
         </CardHeader>
-        <CardContent className="flex flex-col gap-3">
-          {parentProfile.notices.map((notice, index) => (
-            <div key={notice.id}>
-              {index > 0 && <Separator className="mb-3" />}
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-sm font-medium leading-snug">{notice.title}</p>
-                <Badge variant="secondary">{notice.time}</Badge>
+        <CardContent className="flex flex-col gap-2">
+          {today.map((row) => (
+            <div
+              key={`${row.period}-${row.subject}`}
+              className="flex items-center justify-between gap-2 rounded-lg border border-border/70 px-3 py-2 text-sm"
+            >
+              <div>
+                <p className="font-medium">
+                  {c.period} {row.period} · {row.subject}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {row.time} · {row.teacher}
+                </p>
               </div>
             </div>
           ))}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-start justify-between gap-3">
+          <CardTitle>{c.homeworkDue}</CardTitle>
+          <Link
+            href="/parent/homework"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {c.viewAll}
+          </Link>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          {homework.slice(0, 3).map((item) => (
+            <div
+              key={item.id}
+              className={cn(
+                "flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm",
+                item.status === "overdue" || item.status === "not_submitted"
+                  ? "border-border/70"
+                  : "border-border/50 text-muted-foreground",
+              )}
+            >
+              <div>
+                <p className="font-medium">{item.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {item.subject} · {c.due} {item.due}
+                </p>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Quick href="/parent/attendance" icon={CalendarCheck}>
+          {c.attendance}
+        </Quick>
+        <Quick href="/parent/homework" icon={NotebookPen}>
+          {c.homework}
+        </Quick>
+      </div>
     </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  hint,
+  children,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardDescription>{label}</CardDescription>
+        <CardTitle className="font-[family-name:var(--font-display)] text-2xl tabular-nums">
+          {value}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-xs text-muted-foreground">{hint}</p>
+        {children}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Quick({
+  href,
+  icon: Icon,
+  children,
+}: {
+  href: string;
+  icon: typeof CalendarCheck;
+  children: React.ReactNode;
+}) {
+  return (
+    <Button asChild variant="outline" className="h-auto justify-start gap-3 py-3">
+      <Link href={href}>
+        <Icon className="size-4" />
+        {children}
+      </Link>
+    </Button>
   );
 }

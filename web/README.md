@@ -1,3 +1,5 @@
+EduNexus web app. Demo password: `demo-password`. Super Admin: `super@edunexus.app` (`/super-admin`). School trial: `/register`. Full accounts: root `README.md`.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

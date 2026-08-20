@@ -16,7 +16,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     setMounted(true);
   }, []);
 
-  const isDark = mounted && resolvedTheme === "dark";
+  const isDark = resolvedTheme === "dark";
   const label = isDark ? t("themeLight") : t("themeDark");
 
   return (
@@ -31,7 +31,15 @@ export function ThemeToggle({ className }: { className?: string }) {
       title={mounted ? label : t("themeDark")}
       suppressHydrationWarning
     >
-      {isDark ? <Sun aria-hidden /> : <Moon aria-hidden />}
+      {mounted ? (
+        isDark ? (
+          <Sun aria-hidden suppressHydrationWarning />
+        ) : (
+          <Moon aria-hidden suppressHydrationWarning />
+        )
+      ) : (
+        <span className="size-4" aria-hidden />
+      )}
     </Button>
   );
 }

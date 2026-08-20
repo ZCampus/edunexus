@@ -54,7 +54,7 @@ export const parentProfile = {
   name: "Asha Juma",
   children: [
     { id: "s1", name: "Neema Juma", className: "Form 2A" },
-    { id: "s2", name: "Baraka Juma", className: "Standard 6" },
+    { id: "s2", name: "Baraka Juma", className: "Form 1A" },
   ],
   balanceTzs: 185_000,
   attendanceWeek: [
@@ -128,7 +128,7 @@ export const marksEntry = {
 
 export const demoRoles = [
   { id: "headmaster", href: "/headmaster", labelKey: "navHeadmaster" as const },
-  { id: "teacher", href: "/teacher/attendance", labelKey: "navTeacher" as const },
+  { id: "teacher", href: "/teacher", labelKey: "navTeacher" as const },
   { id: "parent", href: "/parent", labelKey: "navParent" as const },
   { id: "student", href: "/student", labelKey: "navStudent" as const },
 ] as const;

@@ -9,22 +9,25 @@ import { GraduationCap } from "lucide-react";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { demoUsers, useAuth } from "@/lib/auth";
+import {
+  adminDemoUsers,
+  DEMO_PASSWORD,
+  platformDemoUsers,
+  portalDemoUsers,
+  useAuth,
+} from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { school } from "@/lib/mock-data";
+import { roleLabelKey } from "@/lib/role-label";
 
 export default function LoginPage() {
   const { t } = useI18n();
   const { login } = useAuth();
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [email, setEmail] = useState(demoUsers[0].email);
+  const [email, setEmail] = useState(platformDemoUsers[0].email);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,7 +38,7 @@ export default function LoginPage() {
         String(form.get("email") ?? ""),
         String(form.get("password") ?? ""),
       );
-      toast.success(`${user.name} · ${user.role}`);
+      toast.success(`${user.name} · ${t(roleLabelKey(user.role))}`);
       router.replace(user.homePath);
     } catch {
       toast.error(t("loginUnknown"));
@@ -59,19 +62,15 @@ export default function LoginPage() {
         <div className="mb-6 flex flex-col gap-3">
           <Link href="/" className="flex items-center gap-2">
             <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <GraduationCap aria-hidden />
+              <GraduationCap aria-hidden suppressHydrationWarning />
             </span>
             <span className="font-[family-name:var(--font-display)] text-xl">
               {t("brand")}
             </span>
           </Link>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight">
-              {t("loginTitle")}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("loginSubtitle")}
-            </p>
+            <h1 className="text-xl font-semibold tracking-tight">{t("loginTitle")}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{t("loginSubtitle")}</p>
           </div>
         </div>
 
@@ -105,7 +104,7 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
-                defaultValue="demo-password"
+                defaultValue={DEMO_PASSWORD}
                 autoComplete="current-password"
                 required
               />
@@ -117,19 +116,72 @@ export default function LoginPage() {
           </Button>
         </form>
 
+        <p className="mt-3 text-sm">
+          <Link
+            href="/forgot-password"
+            className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            {t("forgotPassword")}
+          </Link>
+        </p>
+
+        <p className="mt-3 text-sm">
+          <Link href="/register" className="text-primary underline-offset-4 hover:underline">
+            {t("ctaTrial")}
+          </Link>
+        </p>
+
         <div className="mt-6 rounded-xl border border-border/70 bg-muted/30 p-3">
           <p className="mb-2 text-xs font-medium text-muted-foreground">
-            {t("demoAccountsHint")}
+            {t("demoPlatformHint")}
           </p>
           <div className="flex flex-col gap-1.5">
-            {demoUsers.map((account) => (
+            {platformDemoUsers.map((account) => (
               <button
                 key={account.id}
                 type="button"
                 onClick={() => setEmail(account.email)}
                 className="rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-background"
               >
-                <span className="font-medium text-foreground">{account.role}</span>
+                <span className="font-medium text-foreground">
+                  {t(roleLabelKey(account.role))}
+                </span>
+                <span className="text-muted-foreground"> · {account.email}</span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-3 mb-2 text-xs font-medium text-muted-foreground">
+            {t("demoAdminHint")}
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {adminDemoUsers.map((account) => (
+              <button
+                key={account.id}
+                type="button"
+                onClick={() => setEmail(account.email)}
+                className="rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-background"
+              >
+                <span className="font-medium text-foreground">
+                  {t(roleLabelKey(account.role))}
+                </span>
+                <span className="text-muted-foreground"> · {account.email}</span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-3 mb-2 text-xs font-medium text-muted-foreground">
+            {t("demoPortalHint")}
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {portalDemoUsers.map((account) => (
+              <button
+                key={account.id}
+                type="button"
+                onClick={() => setEmail(account.email)}
+                className="rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-background"
+              >
+                <span className="font-medium text-foreground">
+                  {t(roleLabelKey(account.role))}
+                </span>
                 <span className="text-muted-foreground"> · {account.email}</span>
               </button>
             ))}
